@@ -7,6 +7,10 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import java.io.IOException;
 
+/**
+ * Classe principale de notre application.
+ * Paramètre l'IHM principale en précisant sa taille, son titre et une icône.
+ */
 public class musicApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
@@ -19,6 +23,9 @@ public class musicApplication extends Application {
         stage.show();
     }
 
+    /**
+     * Démarre le programme, affiche l'IHM.
+     */
     public static void main(String[] args) {
         launch();
     }

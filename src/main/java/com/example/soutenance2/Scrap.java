@@ -7,11 +7,11 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
+/**
+ * La classe Scrap
+ */
 public class Scrap {
 
     String titre;
@@ -23,10 +23,19 @@ public class Scrap {
     int id_genre;
 
     PrintWriter ecrire;
-
     WebClient webClient = new WebClient();
 
 
+    /**
+     * Instantiates a new Scrap.
+     *
+     * @param titre Titre de l'œuvre, nom de l'artiste
+     * @param genre Le genre musical
+     * @param date  La date d'édition
+     * @param prixmin Le prix minimal choisi par l'utilisateur
+     * @param prixmax Le prix maximal choisi par l'utilisateur
+     * @param site  Le site scrappé
+     */
     public Scrap(String titre, String genre, LocalDate date, int prixmin, int prixmax, String site) {
         this.titre = titre;
         this.genre = genre;
@@ -36,6 +45,17 @@ public class Scrap {
         this.site = site;
     }
 
+    /**
+     * chercher
+     *
+     * Récupère le contenu des champs de recherche
+     * Selon les sites sélectionnés, effectue le scrap correspondant
+     * Accumule les résultats dans une chaîne de caractères
+     * Ajoute chaque résultat à une liste
+     *
+     * @return la chaîne de caractère contenant tous les résultats
+     * @throws IOException Erreur dans le code
+     */
     public String chercher() throws IOException {
 
         // Nom du produit

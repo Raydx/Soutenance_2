@@ -1,18 +1,31 @@
 package com.example.soutenance2;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.Buffer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * La classe enregistrementBDD.
+ * Elle est appelée afin de stocker le contenu scrappé dans une BDD distante.
+ */
 public class enregistrementBDD {
     private static final String SQL_INSERT = "INSERT INTO recherche(Titre,Description,Prix,id_genre,site) VALUES (?,?,?,?,?)";
 
+    /**
+     * saveBdd
+     *
+     * @param titre       Titre de l'oeuvre, nom de l'artiste
+     * @param description Description du produit
+     * @param prix        Le prix
+     * @param genre       Le genre musical
+     * @param site        Le site scrappé
+     * @throws SQLException Erreur au niveau de la BDD
+     * @throws IOException  Erreur au niveau du code
+     */
     public static void saveBdd(String titre, String description, double prix, int genre, String site) throws SQLException, IOException {
         BufferedReader reader;
         String nomServeur;
@@ -21,6 +34,9 @@ public class enregistrementBDD {
         String user;
         String mdp;
 
+        /** Reader qui permet d'établir la connexion à la BDD selon la configuration
+         * enregistrée dans le fichier texte prévu à cet effet.
+         */
         reader = new BufferedReader(new FileReader("db/db_connexion.txt"));
         nomServeur = reader.readLine();
         port = Integer.parseInt(reader.readLine());

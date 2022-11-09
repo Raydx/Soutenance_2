@@ -1,7 +1,5 @@
 package com.example.soutenance2;
 
-
-import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -16,16 +14,14 @@ import sendinblue.Configuration;
 import sendinblue.auth.ApiKeyAuth;
 import sibApi.TransactionalEmailsApi;
 import sibModel.*;
+import java.awt.Desktop;
 
 import java.io.*;
-import java.math.BigDecimal;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -45,6 +41,8 @@ public class mainController {
     @FXML
     private TextField Prixmax;
     @FXML
+    private TextArea mode_demploi;
+    @FXML
     private CheckBox discog;
     @FXML
     private CheckBox fnac;
@@ -59,15 +57,15 @@ public class mainController {
     @FXML
     private TextField Email;
     @FXML
-    private  TextField nomServeur;
+    private TextField nomServeur;
     @FXML
-    private  TextField nomBdd;
+    private TextField nomBdd;
     @FXML
-    private  TextField portBdd;
+    private TextField portBdd;
     @FXML
-    private  TextField loginUser;
+    private TextField loginUser;
     @FXML
-    private  TextField mdpUser;
+    private TextField mdpUser;
 
     public TextField getTitre() {
         return Titre;
@@ -109,33 +107,39 @@ public class mainController {
         Prixmax = prixmax;
     }
 
-    public TextField getEmail(){return Email;}
+    public TextField getEmail() {
+        return Email;
+    }
 
-    public  TextField getNomServeur() {
+    public TextField getNomServeur() {
         return nomServeur;
     }
 
-    public  TextField getNomBdd() {
+    public TextField getNomBdd() {
         return nomBdd;
     }
 
-    public  TextField getPortBdd() {
+    public TextField getPortBdd() {
         return portBdd;
     }
 
-    public  TextField getLoginUser() {
+    public TextField getLoginUser() {
         return loginUser;
     }
 
     public TextField getMdpUser() {
         return mdpUser;
     }
-
     static ArrayList<resultatScrap> scrapList = new ArrayList<>();
     public static ArrayList<resultatScrap> getScrapList() {
         return scrapList;
     }
 
+    /**
+     * onValidateEffacer
+     * Permet de réintialiser les champs de l'IHM
+     * suite au clic du bouton "Effacer".
+     */
     @FXML
     protected void onValidateEffacer() {
         /*-----------------------reset champs-------------------------------- */
@@ -154,9 +158,16 @@ public class mainController {
         mesvinyles.setSelected(false);
         culturefactory.setSelected(false);
     }
+
+    /**
+     * onValidateRechercher
+     * Récupère le contenu des champs de l'IHM
+     * et appelle la fonction scrap de chaque site sélectionné grâce à ces champs.
+     *
+     * @throws IOException Erreur au niveau du code.
+     */
     @FXML
     protected void onValidateRechercher() throws IOException {
-
         Scrap scrap;
         String titre = "";
         String genre;
@@ -167,17 +178,21 @@ public class mainController {
         String res = "";
 
         titre = Titre.getText();
-        genre = Genre.getSelectionModel().getSelectedItem();
+        genre = Genre.getSelectionModel().
+
+                getSelectedItem();
+
         date = dateRecherche.getValue();
 
-        if (titre.equals("")){
+        if (titre.equals("")) {
             Popup("Veuillez entrer un titre ou un artiste à rechercher.");
         }
         try {
             prixmin = Integer.parseInt(Prixmin.getText());
             prixmax = Integer.parseInt(Prixmax.getText());
             if (prixmin < 0 || prixmax < prixmin) throw new Exception();
-        } catch (Exception e) {
+        } catch (
+                Exception e) {
             Popup("Veuillez entrer un entier");
             Prixmin.setText("");
             Prixmax.setText("");
@@ -218,8 +233,16 @@ public class mainController {
         }
         Resultats.setText(res);
     }
+
+
+    /**
+     * afficherMail.
+     * Affiche la fenêtre relative à l'envoi d'email.
+     *
+     * @throws IOException Erreur au niveau du code.
+     */
     @FXML
-    protected void afficherMail() throws IOException{
+    protected void afficherMail() throws IOException {
         Stage mail = new Stage();
         FXMLLoader fxmlLoader = new FXMLLoader(musicApplication.class.getResource("mail.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), 350, 270);
@@ -227,15 +250,25 @@ public class mainController {
         mail.setScene(scene);
         mail.show();
     }
+
+    /**
+     * envoyerMail
+     * Permet d'envoyer un email au destinataire renseigné
+     * avec en pièce jointe le fichier choisi par l'utilisateur.
+     *
+     * @throws IOException Erreur au niveau du code.
+     */
     @FXML
-    protected void envoyerMail() throws IOException{
+    protected void envoyerMail() throws IOException {
         String email = "";
         email = Email.getText();
 
         ApiClient defaultClient = Configuration.getDefaultApiClient();
         // Configure API key authorization: api-key
         ApiKeyAuth apiKey = (ApiKeyAuth) defaultClient.getAuthentication("api-key");
-        apiKey.setApiKey("insérer clé api ici");
+
+        // version github
+        apiKey.setApiKey("Insérez la clé api ici");
 
         try {
             // expéditeur
@@ -260,7 +293,7 @@ public class mainController {
             FileChooser fileChooser = new FileChooser();
 
             fileChooser.setTitle("Ouvrir");
-            fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text Files","*.txt"));
+            fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
             File fichierResultat = fileChooser.showOpenDialog(stage);
 
             SendSmtpEmailAttachment attachment = new SendSmtpEmailAttachment();
@@ -295,28 +328,52 @@ public class mainController {
             System.out.println("Exception occurred:- " + e.getMessage());
         }
     }
+
+    /**
+     * ecrireDansUnFichier
+     * Permet de sauvegarder le résultat de la recherche préalablement effectuée
+     * dans un fichier texte à l'emplacement souhaité par l'utilisateur.
+     *
+     * @throws IOException Erreur au niveau du code
+     */
     @FXML
     protected void ecrireDansUnFichier() throws IOException {
         Stage stage = new Stage();
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Sauvegardez votre recherche");
-        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text Files","*.txt"));
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Text Files", "*.txt"));
         File fichierResultat = fileChooser.showSaveDialog(stage);
-        if(fichierResultat != null) {
+        if (fichierResultat != null) {
             PrintWriter ecrire = new PrintWriter(fichierResultat);
             ecrire.print(Resultats.getText());
             ecrire.close();
         }
     }
+
+    /**
+     * afficherBdd
+     * Affiche la fenêtre relative au paramétrage de la base de données.
+     *
+     * @throws IOException Erreur au niveau du code.
+     */
     @FXML
-    protected void afficherBdd() throws IOException{
+    protected void afficherBdd() throws IOException {
         Stage mail = new Stage();
         FXMLLoader fxmlLoader = new FXMLLoader(musicApplication.class.getResource("bdd.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 600, 660);
+        Scene scene = new Scene(fxmlLoader.load(), 483, 498);
         mail.setTitle("Paramètres de la base de données");
         mail.setScene(scene);
         mail.show();
     }
+
+    /**
+     * onValidateBdd
+     * Récupère le contenu des champs, tente une connexion à la BDD donnée
+     * Si la tentative est un succès, stocke le contenu des champs dans un fichier texte
+     * Sinon, averti l'utilisateur de l'échec de la connexion.
+     *
+     * @throws IOException Erreur au niveau du code.
+     */
     @FXML
     protected void onValidateBdd() throws IOException {
         String serveur = nomServeur.getText();
@@ -332,7 +389,7 @@ public class mainController {
                 System.out.println("Connected to the database!");
                 File rep = new File("db");
                 rep.mkdir();
-                String nomFichierSortie = rep + File.separator +"db_connexion.txt";
+                String nomFichierSortie = rep + File.separator + "db_connexion.txt";
                 PrintWriter ecrire;
                 String db;
                 ecrire = new PrintWriter(new BufferedWriter
@@ -349,8 +406,13 @@ public class mainController {
             e.printStackTrace();
         }
     }
+
+    /**
+     * transfertBdd
+     * Affiche la fenêtre relative au transfert des données vers la BDD.
+     */
     @FXML
-    protected void transfertBdd(){
+    protected void transfertBdd() {
         Stage bdd = new Stage();
         bdd.initModality(Modality.APPLICATION_MODAL);
         bdd.setTitle("Transmission BDD");
@@ -369,10 +431,18 @@ public class mainController {
         VBox layout = new VBox(10);
         layout.getChildren().addAll(label1, label2, button1, button2);
         layout.setAlignment(Pos.CENTER);
-        Scene scene1 = new Scene(layout,350,200);
+        Scene scene1 = new Scene(layout, 350, 200);
         bdd.setScene(scene1);
         bdd.show();
     }
+
+    /**
+     * enregistrerBdd
+     * Se connecte à la BDD configurée à l'aide du fichier texte
+     * Enregistre dans la BDD chaque résultat scrappé contenu dans la liste.
+     *
+     * @throws IOException Erreur au niveau du code.
+     */
     @FXML
     protected void enregistrerBdd() throws IOException {
         BufferedReader reader;
@@ -393,7 +463,7 @@ public class mainController {
         try (Connection conn = DriverManager.getConnection(
                 "jdbc:mysql://" + nomServeur + ":" + port + "/" + nomBdd + "?zeroDateTimeBehavior=CONVERT_TO_NULL&serverTimezone=UTC", user, mdp)) {
             for (resultatScrap resScrap : scrapList) {
-                enregistrementBDD.saveBdd(resScrap.titre,resScrap.desc,resScrap.prix,resScrap.genre,resScrap.lien);
+                enregistrementBDD.saveBdd(resScrap.titre, resScrap.desc, resScrap.prix, resScrap.genre, resScrap.lien);
             }
         } catch (SQLException e) {
             System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
@@ -401,6 +471,27 @@ public class mainController {
             e.printStackTrace();
         }
     }
+
+    /**
+     * afficherAide
+     * Ouvre le pdf "aide", guide utilisateur.
+     *
+     * @throws IOException Erreur au niveau du code
+     */
+    @FXML
+    protected void afficherAide() throws IOException {
+        Desktop bureau = Desktop.getDesktop();
+        File aide = new File("mode_demploi" + File.separator + "aide.pdf");
+        bureau.open(aide);
+    }
+    /**
+     * Popup
+     * Affiche une fenêtre contenant le message d'erreur
+     * que l'on souhaite transmettre à l'utilisateur
+     *
+     * @param erreur Message d'erreur à afficher
+     * @throws IOException Erreur au niveau du code
+     */
     public static void Popup(String erreur) throws IOException {
         Stage popupwindow = new Stage();
         popupwindow.initModality(Modality.APPLICATION_MODAL);
